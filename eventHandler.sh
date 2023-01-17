@@ -3,7 +3,7 @@
 ############## GLOBAL VARS ##############
 RT_FILE="tokens/refresh_token"
 AT_FILE="tokens/access_token"
-DEBUG=true
+DEBUG=false
 #########################################
 
 log() {
@@ -63,6 +63,16 @@ setBatteryTargetSoc() {
 	echo "OK (new reserve reported by API: $RESERVE%)"
 }
 
+getTeslaIds() {
+	check_and_refresh_access_token
+	RESPONSE=`curl -s -H "Authorization: Bearer $ACCESS_TOKEN" -H "content-type: application/json; charset=utf-8" https://owner-api.teslamotors.com/api/1/products`
+	log $RESPONSE
+	echo -n "SITE_ID: "
+	echo $RESPONSE | jq -r .response[0].energy_site_id
+	echo -n "PW_ID: "
+	echo $RESPONSE | jq -r .response[0].id
+}
+
 
 ############ MAIN ###########
 
@@ -85,6 +95,9 @@ case $1 in
 	charging_stopped)
 		echo Charging stopped - resetting battery backup reserve to $BACKUP_RESERVE_PERCENT%
 		setBatteryTargetSoc $BACKUP_RESERVE_PERCENT # reenable battery self consumption
+		;;
+	getTeslaIds)
+		getTeslaIds
 		;;
 	*)
 		echo Unknown event type
