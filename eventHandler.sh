@@ -1,8 +1,9 @@
 #!/bin/sh
 
 ############## GLOBAL VARS ##############
-RT_FILE="tokens/refresh_token"
-AT_FILE="tokens/access_token"
+BASEDIR=`dirname $0`
+RT_FILE="$BASEDIR/tokens/refresh_token"
+AT_FILE="$BASEDIR/tokens/access_token"
 DEBUG=false
 #########################################
 
@@ -19,14 +20,14 @@ log() {
 check_and_refresh_access_token() {
 
 	if [ -f $AT_FILE ]; then
-		ACCESS_TOKEN=$(<$AT_FILE)
+		ACCESS_TOKEN=`cat $AT_FILE`
 		EXP=`echo $ACCESS_TOKEN | sed -e 's/^[^\.]*\.\(.*\)\..*$/\1/' | base64 -d | jq .exp`
 		log expire time of token: $EXP
 
 		NOW=`date +%s`
 		log current time: $NOW
 
-		DELTA=$[EXP - NOW]
+		DELTA=$(( $EXP - $NOW ))
 		log seconds remaining: $DELTA
 	else
 		DELTA=0
@@ -41,7 +42,7 @@ check_and_refresh_access_token() {
 refresh_access_token() {
 	[ ! -f $RT_FILE ] && echo "refresh token file ($RT_FILE) missing. Aborting." && exit 1
 
-	REFRESH_TOKEN=$(<$RT_FILE)
+	REFRESH_TOKEN=`cat $RT_FILE`
 	REFRESH_DATA="{\"grant_type\": \"refresh_token\", \"client_id\": \"ownerapi\", \"refresh_token\": \"$REFRESH_TOKEN\", \"scope\": \"openid email offline_access\" }"
 	log sending refresh data: $REFRESH_DATA
 	REFRESH_REPLY=`curl -s -X POST -H "content-type: application/json; charset=utf-8" -d "$REFRESH_DATA" https://auth.tesla.com/oauth2/v3/token`
@@ -76,8 +77,8 @@ getTeslaIds() {
 
 ############ MAIN ###########
 
-[ ! -f ./settings.env ] && echo "missing settings.env file. Please copy the provided settings.env.example and adjust values." && exit 1
-. ./settings.env
+[ ! -f $BASEDIR/settings.env ] && echo "missing settings.env file. Please copy the provided settings.env.example and adjust values." && exit 1
+. $BASEDIR/settings.env
 
 log "params: $*"
 
