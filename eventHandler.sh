@@ -59,7 +59,9 @@ setBatteryTargetSoc() {
 	[ $TESLA_RC -ne 201 ] && echo Setting TargetSoc failed. Result Code from API is $TESLA_RC. Full API response below: && echo $RESPONSE && return
 
 	# check status to verify update was correct
-	RESERVE=`curl -s -H "Authorization: Bearer $ACCESS_TOKEN" -H "content-type: application/json; charset=utf-8" https://owner-api.teslamotors.com/api/1/powerwalls/$PW_ID | jq .response.backup.backup_reserve_percent`
+	RESPONSE=`curl -s -H "Authorization: Bearer $ACCESS_TOKEN" -H "content-type: application/json; charset=utf-8" https://owner-api.teslamotors.com/api/1/powerwalls/$PW_ID `
+	log $RESPONSE
+	RESERVE=`echo $RESPONSE | jq .response.backup.backup_reserve_percent`
 	[ $RESERVE -ne $1 ] && echo Setting TargetSoc failed. Requested $1% but status is $RESERVE% && return
 	echo "OK (new reserve reported by API: $RESERVE%)"
 }
