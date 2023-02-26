@@ -15,9 +15,6 @@ The script employs the Cloud API of Tesla to adjust the backup reserve percentag
 To access said API you need to provide your ephemeral ***refresh*** token. Obtaining the token
 is somewhat involved. The easiest way I have found was to use the script ```get_token.py``` provided by [Marky0/tesla_api_lite](https://github.com/Marky0/tesla_api_lite)
 
-Alternatively you can also log into the Tesla portal in your browser and extract
-the token from the cookies. #hackerman
-
 The above step is only required once.
 The script will automatically fetch access tokens as needed with the provided refresh token.
 Access tokens are cached and reused until expiry.
